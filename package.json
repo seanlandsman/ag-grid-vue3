@@ -1,8 +1,10 @@
 {
   "name": "ag-grid-vue3",
-  "version": "0.0.0",
+  "version": "0.0.33",
   "private": true,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/main.umd.js",
   "module": "./dist/main.mjs",
   "typings": "./dist/typings/main.d.ts",
@@ -12,7 +14,8 @@
     "preview": "vite preview",
     "test:unit": "vitest",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build --force --declaration --emitDeclarationOnly"
+    "type-check": "vue-tsc --build --force --declaration --emitDeclarationOnly",
+    "bootstrap": "YARN_REGISTRY=\"http://52.50.158.57:4873\" yarn"
   },
   "dependencies": {
     "vue": "^3.4.29",

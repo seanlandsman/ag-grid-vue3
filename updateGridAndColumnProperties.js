@@ -203,7 +203,7 @@ const updateGridProperties = (getGridPropertiesAndEvents) => {
     const { code: gridPropertiesAndEvents, types, defaults } = getGridPropertiesAndEvents();
     const importsForProps = `import type {${EOL}    ${types.join(',' + EOL + '    ')}${EOL}} from "ag-grid-community";`;
     const optionsForGrid = {
-        files: './src/components/AgGridVue.vue',
+        files: './src/components/utils.ts',
         from: [/(\/\/ @START_PROPS@)[^]*(\/\/ @END_PROPS@)/, /(\/\/ @START_IMPORTS@)[^]*(\/\/ @END_IMPORTS@)/, /(\/\/ @START_DEFAULTS@)[^]*(\/\/ @END_DEFAULTS@)/],
         to: [
             `// @START_PROPS@${EOL}${gridPropertiesAndEvents}    // @END_PROPS@`,
