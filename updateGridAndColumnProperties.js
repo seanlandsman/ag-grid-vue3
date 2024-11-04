@@ -81,25 +81,25 @@ function generatePropsAndEmits({ typeLookup, eventTypeLookup, docLookup }) {
         propDefaultsToWrite.push({ order, line: `  ${property}: undefined,${EOL}`});
     });
 
-    let result = writeSortedLines(propsToWrite, '');
-    let defaults = writeSortedLines(propDefaultsToWrite, '');
+    const props = writeSortedLines(propsToWrite, '');
+    const defaults = writeSortedLines(propDefaultsToWrite, '');
 
-    let eventsToWrite = [];
+    const eventsToWrite = [];
     const missingEventTypes = [];
-    // _PUBLIC_EVENTS.forEach((event) => {
-    //     if (skippableEvents.includes(event)) return;
-    //
-    //     const onEvent = _getCallbackForEvent(event);
-    //     const eventType = eventTypeLookup[onEvent];
-    //     if (eventType) {
-    //         let line = addDocLine(docLookup, onEvent, '');
-    //         line += `    @Output() public ${event}: EventEmitter<${eventType}> = new EventEmitter<${eventType}>();${EOL}`;
-    //         const order = typeKeysOrder.findIndex((p) => p === onEvent);
-    //         eventsToWrite.push({ order, line });
-    //     } else {
-    //         missingEventTypes.push(event);
-    //     }
-    // });
+    _PUBLIC_EVENTS.forEach((event) => {
+        if (skippableEvents.includes(event)) return;
+
+        const onEvent = _getCallbackForEvent(event);
+        const eventType = eventTypeLookup[onEvent];
+        if (eventType) {
+            let line = addDocLine(docLookup, onEvent, '');
+            line += `   '${event}': [event: ${eventType}],${EOL}`
+            const order = typeKeysOrder.findIndex((p) => p === onEvent);
+            eventsToWrite.push({ order, line });
+        } else {
+            missingEventTypes.push(event);
+        }
+    });
 
     if (missingEventTypes.length > 0) {
         throw new Error(
@@ -107,10 +107,11 @@ function generatePropsAndEmits({ typeLookup, eventTypeLookup, docLookup }) {
         );
     }
 
-    result = writeSortedLines(eventsToWrite, result);
+    const events = writeSortedLines(eventsToWrite, '');
 
-    const typesToImport = extractTypes({ eventTypeLookup, typeLookup }, skippableProperties, skippableEventTypes);
-    return { code: result, types: typesToImport, defaults };
+    const typesToImport = extractNonEventTypes({ eventTypeLookup, typeLookup }, skippableProperties, skippableEventTypes);
+    const eventTypesToImport = extractEventTypes({ eventTypeLookup, typeLookup }, skippableProperties, skippableEventTypes);
+    return { code: props, types: typesToImport, eventTypes: eventTypesToImport, defaults, events };
 }
 
 function getSafeType(typeName) {
@@ -153,11 +154,33 @@ function parseFile(sourceFile) {
     return ts.createSourceFile('tempFile.ts', src, ts.ScriptTarget.Latest, true);
 }
 
-function extractTypes(context, propsToSkip = [], typesToSkip = []) {
+function extractNonEventTypes(context, propsToSkip = [], typesToSkip = []) {
     let allTypes = [
         ...Object.entries(context.typeLookup)
             .filter(([k]) => !propsToSkip.includes(k))
-            .map(([_, v]) => v),
+            .filter(([k]) => !context.eventTypeLookup[k])
+            .map(([_, v]) => v)
+    ];
+
+    let propertyTypes = [];
+    const regex = new RegExp(/(?<!\w)(?:[A-Z]\w+)/, 'g');
+    allTypes.forEach((tt) => {
+        const matches = tt.matchAll(regex);
+        for (const match of matches) {
+            propertyTypes.push(Array.from(match, (m) => m));
+        }
+    });
+    let expandedTypes = propertyTypes.flatMap((m) => m);
+
+    const nonAgTypes = ['Partial', 'Document', 'HTMLElement', 'Function', 'TData'];
+    expandedTypes = [...new Set(expandedTypes)]
+        .filter((t) => !nonAgTypes.includes(t) && !AG_CHART_TYPES.includes(t))
+        .sort();
+    return expandedTypes.filter((t) => !typesToSkip.includes(t));
+}
+
+function extractEventTypes(context, propsToSkip = [], typesToSkip = []) {
+    let allTypes = [
         ...Object.values(context.eventTypeLookup),
     ];
 
@@ -200,19 +223,42 @@ function getGridPropertiesAndEventsJs() {
 
 const updateGridProperties = (getGridPropertiesAndEvents) => {
     // extract the grid properties & events and add them to our angular grid component
-    const { code: gridPropertiesAndEvents, types, defaults } = getGridPropertiesAndEvents();
+    const { code: gridPropertiesAndEvents, types, eventTypes, defaults, events } = getGridPropertiesAndEvents();
     const importsForProps = `import type {${EOL}    ${types.join(',' + EOL + '    ')}${EOL}} from "ag-grid-community";`;
-    const optionsForGrid = {
+    const importsForEvents = `import type {${EOL}    ${eventTypes.join(',' + EOL + '    ')}${EOL}} from "ag-grid-community";`;
+
+    const optionsForUtils = {
         files: './src/components/utils.ts',
-        from: [/(\/\/ @START_PROPS@)[^]*(\/\/ @END_PROPS@)/, /(\/\/ @START_IMPORTS@)[^]*(\/\/ @END_IMPORTS@)/, /(\/\/ @START_DEFAULTS@)[^]*(\/\/ @END_DEFAULTS@)/],
+        from: [/(\/\/ @START_PROPS@)[^]*(\/\/ @END_PROPS@)/,
+            /(\/\/ @START_IMPORTS@)[^]*(\/\/ @END_IMPORTS@)/,
+            /(\/\/ @START_DEFAULTS@)[^]*(\/\/ @END_DEFAULTS@)/
+        ],
         to: [
             `// @START_PROPS@${EOL}${gridPropertiesAndEvents}    // @END_PROPS@`,
             `// @START_IMPORTS@${EOL}${importsForProps}${EOL}// @END_IMPORTS@`,
-            `// @START_DEFAULTS@${EOL}${defaults}${EOL}// @END_DEFAULTS@`,
+            `// @START_DEFAULTS@${EOL}${defaults}${EOL}// @END_DEFAULTS@`
         ],
     };
 
-    replace(optionsForGrid).then((filesChecked) => {
+    replace(optionsForUtils).then((filesChecked) => {
+        const changes = filesChecked.filter((change) => change.hasChanged);
+        console.log(
+            `Grid Properties: ${changes.length === 0 ? 'No Modified files' : 'Modified files: ' + changes.map((change) => change.file).join(', ')}`
+        );
+    });
+
+    const optionsForVue = {
+        files: './src/components/AgGridVue.vue',
+        from: [/(\/\/ @START_IMPORTS@)[^]*(\/\/ @END_IMPORTS@)/,
+            /(\/\/ @START_EVENTS@)[^]*(\/\/ @END_EVENTS@)/,
+        ],
+        to: [
+            `// @START_IMPORTS@${EOL}${importsForEvents}${EOL}// @END_IMPORTS@`,
+            `// @START_EVENTS@${EOL}${events}${EOL}// @END_EVENTS@`
+        ],
+    };
+
+    replace(optionsForVue).then((filesChecked) => {
         const changes = filesChecked.filter((change) => change.hasChanged);
         console.log(
             `Grid Properties: ${changes.length === 0 ? 'No Modified files' : 'Modified files: ' + changes.map((change) => change.file).join(', ')}`
