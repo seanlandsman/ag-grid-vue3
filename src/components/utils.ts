@@ -84,6 +84,7 @@ import type {
 
 import type {GridOptions, Module } from "ag-grid-community";
 import type {AgChartTheme, AgChartThemeOverrides} from 'ag-charts-types';
+import {isProxy, isReactive, isRef, markRaw, toRaw} from "vue";
 
 export interface Properties {
     [propertyName: string]: any;
@@ -1692,4 +1693,22 @@ export const debounce = (func: () => void, delay: number) => {
         window.clearTimeout(timeout);
         timeout = window.setTimeout(later, delay);
     };
+}
+
+export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
+    const objectIterator = (input: any): any => {
+        if (Array.isArray(input)) {
+            return input.map((item) => objectIterator(item));
+        } if (isRef(input) || isReactive(input) || isProxy(input)) {
+            return objectIterator(toRaw(input));
+        } if (input && typeof input === 'object') {
+            return Object.keys(input).reduce((acc, key) => {
+                acc[key as keyof typeof acc] = objectIterator(input[key]);
+                return acc;
+            }, {} as T);
+        }
+        return input;
+    };
+
+    return objectIterator(sourceObj);
 }

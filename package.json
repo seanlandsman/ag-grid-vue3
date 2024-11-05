@@ -1,6 +1,6 @@
 {
   "name": "ag-grid-vue3",
-  "version": "0.0.61",
+  "version": "0.0.94",
   "private": true,
   "files": [
     "dist"

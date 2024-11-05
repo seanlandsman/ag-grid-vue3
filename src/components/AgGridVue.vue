@@ -1,16 +1,18 @@
 <script setup lang="ts" generic="TData = any, TColDef extends ColDef<TData> = ColDef<any>">
 // @START_IMPORTS@
+// noinspection ES6UnusedImports
 import type {
   AdvancedFilterBuilderVisibleChangedEvent,
+  AgEventType,
   AsyncTransactionsFlushedEvent,
   BodyScrollEndEvent,
   BodyScrollEvent,
   CellClickedEvent,
   CellContextMenuEvent,
   CellDoubleClickedEvent,
-  CellEditRequestEvent,
   CellEditingStartedEvent,
   CellEditingStoppedEvent,
+  CellEditRequestEvent,
   CellFocusedEvent,
   CellKeyDownEvent,
   CellMouseDownEvent,
@@ -24,6 +26,7 @@ import type {
   ChartDestroyedEvent,
   ChartOptionsChangedEvent,
   ChartRangeSelectionChangedEvent,
+  ColDef,
   ColumnEverythingChangedEvent,
   ColumnGroupOpenedEvent,
   ColumnHeaderClickedEvent,
@@ -55,10 +58,12 @@ import type {
   FilterOpenedEvent,
   FirstDataRenderedEvent,
   FullWidthCellKeyDownEvent,
+  GridApi,
   GridColumnsChangedEvent,
   GridReadyEvent,
   GridSizeChangedEvent,
   HeaderFocusedEvent,
+  IRowNode,
   ModelUpdatedEvent,
   NewColumnsLoadedEvent,
   PaginationChangedEvent,
@@ -99,25 +104,21 @@ import type {
   VirtualRowRemovedEvent
 } from "ag-grid-community";
 // @END_IMPORTS@
-
 import {
-  _ALL_GRID_OPTIONS,
   _ALL_EVENTS,
+  _ALL_GRID_OPTIONS,
   _combineAttributesAndGridOptions,
   _getCallbackForEvent,
   _processOnChange,
+  _warn,
   ALWAYS_SYNC_GLOBAL_EVENTS,
-  createGrid,
-  _warn
+  createGrid
 } from 'ag-grid-community';
 
-// noinspection ES6UnusedImports
-import type {AgEventType, ColDef, GridApi, IRowNode} from "ag-grid-community";
-
 import type {Ref} from 'vue'
-import {markRaw, onMounted, reactive, ref, toRaw, toRefs, useTemplateRef, watch} from 'vue';
-import {getProps, debounce} from "@/components/utils";
-import type {Properties, Props} from "@/components/utils";
+import {markRaw, onMounted, ref, toRaw, toRefs, useTemplateRef, watch} from 'vue';
+import type {Props} from "@/components/utils";
+import {debounce, deepToRaw, getProps} from "@/components/utils";
 
 
 const ROW_DATA_EVENTS: Set<string> = new Set(['rowDataUpdated', 'cellValueChanged', 'rowValueChanged']);
@@ -423,13 +424,10 @@ const emits = defineEmits<{
   'sortChanged': [event: SortChangedEvent<TData>],
 // @END_EVENTS@
 
-  'update:modelValue': [ event: TData[]],
-  'modelValue': [ event: TData[]]
+  'update:modelValue': [event: TData[]]
 }>();
 
-const props = withDefaults(defineProps<Props<TData, TColDef>>(),  getProps<TData, TColDef>());
-
-const convertToRaw = (value: any) => (value ? (Object.isFrozen(value) ? value : markRaw(toRaw(value))) : value);
+const props = withDefaults(defineProps<Props<TData, TColDef>>(), getProps<TData, TColDef>());
 
 const rootRef = useTemplateRef<HTMLDivElement>('root')
 
@@ -440,16 +438,17 @@ const gridReadyFired: Ref<boolean> = ref(false);
 const batchChanges: Ref<{ [key: string]: any }> = ref({});
 const batchTimeout: Ref<number | null> = ref(null);
 const rowDataModel = defineModel<TData[]>();
-// const rowDataModel = defineModel({default: reactive([])});
+const rowDataUpdating: Ref<boolean> = ref(false);
 
 watch(rowDataModel, (newValue: any, oldValue: any) => {
   if (gridCreated.value) {
-    processChanges('rowData', newValue, oldValue)
+    rowDataUpdating.value = true;
+    processChanges('rowData', deepToRaw(newValue), deepToRaw(oldValue));
   }
-}, { deep: true });
+}, {deep: true});
 
 const checkForBindingConflicts = () => {
-  if ((props.rowData  || props.gridOptions.rowData) && rowDataModel.value) {
+  if ((props.rowData || props.gridOptions.rowData) && rowDataModel.value) {
     _warn(232);
   }
 }
@@ -467,14 +466,15 @@ const getRowData = (): TData[] => {
 }
 
 const emitRowModel = debounce(() => {
-  emits('update:modelValue', getRowData());
+  emits('update:modelValue', deepToRaw<TData[]>(getRowData()));
 }, 20);
 
 const updateModelIfUsed = (eventType: string) => {
   if (gridReadyFired.value && ROW_DATA_EVENTS.has(eventType)) {
-      emitRowModel();
+    emitRowModel();
   }
 }
+
 const globalEventListenerFactory = (restrictToSyncOnly?: boolean) => {
   return (eventType: AgEventType) => {
     if (isDestroyed.value) {
@@ -490,7 +490,12 @@ const globalEventListenerFactory = (restrictToSyncOnly?: boolean) => {
       return;
     }
 
-    updateModelIfUsed(eventType);
+    if (ROW_DATA_EVENTS.has(eventType)) {
+      if (!rowDataUpdating.value) {
+        updateModelIfUsed(eventType);
+      }
+      rowDataUpdating.value = false;
+    }
   };
 }
 
@@ -499,7 +504,7 @@ const processChanges = (propertyName: string, currentValue: any, previousValue: 
     let value = currentValue.value || currentValue;
     if (propertyName === 'rowData' && value != undefined) {
       // Prevent the grids internal edits from being reactive
-      value = convertToRaw(value);
+      value = deepToRaw<TData[]>(value);
     }
 
     batchChanges.value[propertyName] = value;
@@ -545,7 +550,7 @@ onMounted(() => {
 
   const rowData = getRowDataBasedOnBindings();
   if (rowData !== undefined) {
-    gridOptions.rowData = convertToRaw(rowData);
+    gridOptions.rowData = deepToRaw(rowData as TData[]);
   }
 
   api.value = createGrid(rootRef.value!, gridOptions, gridParams);
