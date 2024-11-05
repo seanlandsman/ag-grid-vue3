@@ -1,102 +1,102 @@
 <script setup lang="ts" generic="TData = any, TColDef extends ColDef<TData> = ColDef<any>">
 // @START_IMPORTS@
 import type {
-    AdvancedFilterBuilderVisibleChangedEvent,
-    AsyncTransactionsFlushedEvent,
-    BodyScrollEndEvent,
-    BodyScrollEvent,
-    CellClickedEvent,
-    CellContextMenuEvent,
-    CellDoubleClickedEvent,
-    CellEditRequestEvent,
-    CellEditingStartedEvent,
-    CellEditingStoppedEvent,
-    CellFocusedEvent,
-    CellKeyDownEvent,
-    CellMouseDownEvent,
-    CellMouseOutEvent,
-    CellMouseOverEvent,
-    CellSelectionChangedEvent,
-    CellSelectionDeleteEndEvent,
-    CellSelectionDeleteStartEvent,
-    CellValueChangedEvent,
-    ChartCreatedEvent,
-    ChartDestroyedEvent,
-    ChartOptionsChangedEvent,
-    ChartRangeSelectionChangedEvent,
-    ColumnEverythingChangedEvent,
-    ColumnGroupOpenedEvent,
-    ColumnHeaderClickedEvent,
-    ColumnHeaderContextMenuEvent,
-    ColumnHeaderMouseLeaveEvent,
-    ColumnHeaderMouseOverEvent,
-    ColumnMenuVisibleChangedEvent,
-    ColumnMovedEvent,
-    ColumnPinnedEvent,
-    ColumnPivotChangedEvent,
-    ColumnPivotModeChangedEvent,
-    ColumnResizedEvent,
-    ColumnRowGroupChangedEvent,
-    ColumnValueChangedEvent,
-    ColumnVisibleEvent,
-    ComponentStateChangedEvent,
-    ContextMenuVisibleChangedEvent,
-    CutEndEvent,
-    CutStartEvent,
-    DisplayedColumnsChangedEvent,
-    DragCancelledEvent,
-    DragStartedEvent,
-    DragStoppedEvent,
-    ExpandOrCollapseAllEvent,
-    FillEndEvent,
-    FillStartEvent,
-    FilterChangedEvent,
-    FilterModifiedEvent,
-    FilterOpenedEvent,
-    FirstDataRenderedEvent,
-    FullWidthCellKeyDownEvent,
-    GridColumnsChangedEvent,
-    GridReadyEvent,
-    GridSizeChangedEvent,
-    HeaderFocusedEvent,
-    ModelUpdatedEvent,
-    NewColumnsLoadedEvent,
-    PaginationChangedEvent,
-    PasteEndEvent,
-    PasteStartEvent,
-    PinnedRowDataChangedEvent,
-    PivotMaxColumnsExceededEvent,
-    RangeDeleteEndEvent,
-    RangeDeleteStartEvent,
-    RangeSelectionChangedEvent,
-    RedoEndedEvent,
-    RedoStartedEvent,
-    RowClickedEvent,
-    RowDataUpdatedEvent,
-    RowDoubleClickedEvent,
-    RowDragCancelEvent,
-    RowDragEndEvent,
-    RowDragEnterEvent,
-    RowDragLeaveEvent,
-    RowDragMoveEvent,
-    RowEditingStartedEvent,
-    RowEditingStoppedEvent,
-    RowGroupOpenedEvent,
-    RowSelectedEvent,
-    RowValueChangedEvent,
-    SelectionChangedEvent,
-    SortChangedEvent,
-    StateUpdatedEvent,
-    StoreRefreshedEvent,
-    ToolPanelSizeChangedEvent,
-    ToolPanelVisibleChangedEvent,
-    TooltipHideEvent,
-    TooltipShowEvent,
-    UndoEndedEvent,
-    UndoStartedEvent,
-    ViewportChangedEvent,
-    VirtualColumnsChangedEvent,
-    VirtualRowRemovedEvent
+  AdvancedFilterBuilderVisibleChangedEvent,
+  AsyncTransactionsFlushedEvent,
+  BodyScrollEndEvent,
+  BodyScrollEvent,
+  CellClickedEvent,
+  CellContextMenuEvent,
+  CellDoubleClickedEvent,
+  CellEditRequestEvent,
+  CellEditingStartedEvent,
+  CellEditingStoppedEvent,
+  CellFocusedEvent,
+  CellKeyDownEvent,
+  CellMouseDownEvent,
+  CellMouseOutEvent,
+  CellMouseOverEvent,
+  CellSelectionChangedEvent,
+  CellSelectionDeleteEndEvent,
+  CellSelectionDeleteStartEvent,
+  CellValueChangedEvent,
+  ChartCreatedEvent,
+  ChartDestroyedEvent,
+  ChartOptionsChangedEvent,
+  ChartRangeSelectionChangedEvent,
+  ColumnEverythingChangedEvent,
+  ColumnGroupOpenedEvent,
+  ColumnHeaderClickedEvent,
+  ColumnHeaderContextMenuEvent,
+  ColumnHeaderMouseLeaveEvent,
+  ColumnHeaderMouseOverEvent,
+  ColumnMenuVisibleChangedEvent,
+  ColumnMovedEvent,
+  ColumnPinnedEvent,
+  ColumnPivotChangedEvent,
+  ColumnPivotModeChangedEvent,
+  ColumnResizedEvent,
+  ColumnRowGroupChangedEvent,
+  ColumnValueChangedEvent,
+  ColumnVisibleEvent,
+  ComponentStateChangedEvent,
+  ContextMenuVisibleChangedEvent,
+  CutEndEvent,
+  CutStartEvent,
+  DisplayedColumnsChangedEvent,
+  DragCancelledEvent,
+  DragStartedEvent,
+  DragStoppedEvent,
+  ExpandOrCollapseAllEvent,
+  FillEndEvent,
+  FillStartEvent,
+  FilterChangedEvent,
+  FilterModifiedEvent,
+  FilterOpenedEvent,
+  FirstDataRenderedEvent,
+  FullWidthCellKeyDownEvent,
+  GridColumnsChangedEvent,
+  GridReadyEvent,
+  GridSizeChangedEvent,
+  HeaderFocusedEvent,
+  ModelUpdatedEvent,
+  NewColumnsLoadedEvent,
+  PaginationChangedEvent,
+  PasteEndEvent,
+  PasteStartEvent,
+  PinnedRowDataChangedEvent,
+  PivotMaxColumnsExceededEvent,
+  RangeDeleteEndEvent,
+  RangeDeleteStartEvent,
+  RangeSelectionChangedEvent,
+  RedoEndedEvent,
+  RedoStartedEvent,
+  RowClickedEvent,
+  RowDataUpdatedEvent,
+  RowDoubleClickedEvent,
+  RowDragCancelEvent,
+  RowDragEndEvent,
+  RowDragEnterEvent,
+  RowDragLeaveEvent,
+  RowDragMoveEvent,
+  RowEditingStartedEvent,
+  RowEditingStoppedEvent,
+  RowGroupOpenedEvent,
+  RowSelectedEvent,
+  RowValueChangedEvent,
+  SelectionChangedEvent,
+  SortChangedEvent,
+  StateUpdatedEvent,
+  StoreRefreshedEvent,
+  ToolPanelSizeChangedEvent,
+  ToolPanelVisibleChangedEvent,
+  TooltipHideEvent,
+  TooltipShowEvent,
+  UndoEndedEvent,
+  UndoStartedEvent,
+  ViewportChangedEvent,
+  VirtualColumnsChangedEvent,
+  VirtualRowRemovedEvent
 } from "ag-grid-community";
 // @END_IMPORTS@
 
@@ -108,104 +108,21 @@ import {
   _processOnChange,
   ALWAYS_SYNC_GLOBAL_EVENTS,
   createGrid,
+  _warn
 } from 'ag-grid-community';
 
 // noinspection ES6UnusedImports
-import type {AgEventType, ColDef, GridApi} from "ag-grid-community";
+import type {AgEventType, ColDef, GridApi, IRowNode} from "ag-grid-community";
 
 import type {Ref} from 'vue'
-import {markRaw, onMounted, ref, toRaw, toRefs, useTemplateRef, watch} from 'vue';
-import {getProps} from "@/components/utils";
+import {markRaw, onMounted, reactive, ref, toRaw, toRefs, useTemplateRef, watch} from 'vue';
+import {getProps, debounce} from "@/components/utils";
 import type {Properties, Props} from "@/components/utils";
 
-const props = withDefaults(defineProps<Props<TData, TColDef>>(),  getProps<TData, TColDef>());
 
-const convertToRaw = (value: any) => (value ? (Object.isFrozen(value) ? value : markRaw(toRaw(value))) : value);
-
-const rootRef = useTemplateRef<HTMLDivElement>('root')
-
-const api: Ref<GridApi | undefined> = ref(undefined);
-const gridCreated: Ref<boolean> = ref(false);
-const isDestroyed: Ref<boolean> = ref(false);
-const gridReadyFired: Ref<boolean> = ref(false);
-const batchChanges: Ref<{ [key: string]: any }> = ref({});
-const batchTimeout: Ref<number | null> = ref(null);
-
-const globalEventListenerFactory = (restrictToSyncOnly?: boolean) => {
-  return (eventType: AgEventType) => {
-    if (isDestroyed.value) {
-      return;
-    }
-
-    if(eventType === 'cellClicked') {
-      console.log('here!', eventType);
-    }
-    if (eventType === 'gridReady') {
-      gridReadyFired.value = true;
-    }
-
-    const alwaysSync = ALWAYS_SYNC_GLOBAL_EVENTS.has(eventType);
-    if ((alwaysSync && !restrictToSyncOnly) || (!alwaysSync && restrictToSyncOnly)) {
-      return;
-    }
-
-    // this.updateModelIfUsed(eventType);
-  };
-}
-
-const processChanges = (propertyName: string, currentValueRef: any, previousValue: any) => {
-  if (gridCreated.value) {
-    let {value} = currentValueRef;
-    if (propertyName === 'rowData' && value != undefined) {
-      // Prevent the grids internal edits from being reactive
-      value = convertToRaw(value);
-    }
-
-    batchChanges.value[propertyName] = value;
-    if (batchTimeout.value == null) {
-      batchTimeout.value = window.setTimeout(() => {
-        // Clear the timeout before processing the changes in case processChanges triggers another change.
-        batchTimeout.value = null;
-        _processOnChange(batchChanges.value, api.value!);
-        batchChanges.value = {};
-      }, 0);
-    }
-  }
-}
-
-const propsAsRefs = toRefs<any>(props);
-_ALL_GRID_OPTIONS
-    .filter((propertyName: string) => propertyName != 'gridOptions') // dealt with in AgGridVue itself
-    .forEach((propertyName: string) => {
-      watch(() => propsAsRefs[propertyName],
-          (oldValue: any, newValue: any) => {
-            processChanges(propertyName, oldValue, newValue);
-          },
-          {deep: true})
-    })
-
-onMounted(() => {
-  const gridParams = {
-    globalEventListener: globalEventListenerFactory().bind(this),
-    globalSyncEventListener: globalEventListenerFactory(true).bind(this),
-    // frameworkOverrides: new VueFrameworkOverrides(this),
-    // providedBeanInstances: {
-    //   frameworkComponentWrapper,
-    // },
-    modules: props.modules
-  };
-
-  const gridOptions = markRaw(
-      _combineAttributesAndGridOptions(toRaw(props.gridOptions), props, [
-        ..._ALL_GRID_OPTIONS,
-        ..._ALL_EVENTS.map((event) => _getCallbackForEvent(event)),
-      ])
-  );
-
-  api.value = createGrid(rootRef.value!, gridOptions, gridParams);
-  gridCreated.value = true;
-
-})
+const ROW_DATA_EVENTS: Set<string> = new Set(['rowDataUpdated', 'cellValueChanged', 'rowValueChanged']);
+const DATA_MODEL_ATTR_NAME = 'onUpdate:modelValue'; // emit name would be update:ModelValue
+const DATA_MODEL_EMIT_NAME = 'update:modelValue';
 
 const emits = defineEmits<{
 // @START_EVENTS@
@@ -504,10 +421,137 @@ const emits = defineEmits<{
   /** Sort has changed. The grid also listens for this and updates the model.
    */
   'sortChanged': [event: SortChangedEvent<TData>],
-
-
 // @END_EVENTS@
+
+  'update:modelValue': [ event: TData[]],
+  'modelValue': [ event: TData[]]
 }>();
+
+const props = withDefaults(defineProps<Props<TData, TColDef>>(),  getProps<TData, TColDef>());
+
+const convertToRaw = (value: any) => (value ? (Object.isFrozen(value) ? value : markRaw(toRaw(value))) : value);
+
+const rootRef = useTemplateRef<HTMLDivElement>('root')
+
+const api: Ref<GridApi | undefined> = ref(undefined);
+const gridCreated: Ref<boolean> = ref(false);
+const isDestroyed: Ref<boolean> = ref(false);
+const gridReadyFired: Ref<boolean> = ref(false);
+const batchChanges: Ref<{ [key: string]: any }> = ref({});
+const batchTimeout: Ref<number | null> = ref(null);
+const rowDataModel = defineModel<TData[]>();
+// const rowDataModel = defineModel({default: reactive([])});
+
+watch(rowDataModel, (newValue: any, oldValue: any) => {
+  if (gridCreated.value) {
+    processChanges('rowData', newValue, oldValue)
+  }
+}, { deep: true });
+
+const checkForBindingConflicts = () => {
+  if ((props.rowData  || props.gridOptions.rowData) && rowDataModel.value) {
+    _warn(232);
+  }
+}
+
+const getRowDataBasedOnBindings = () => {
+  return rowDataModel.value || props.rowData || props.gridOptions.rowData;
+}
+
+const getRowData = (): TData[] => {
+  const rowData: any[] = [];
+  api?.value!.forEachNode((rowNode: IRowNode) => {
+    rowData.push(rowNode.data);
+  });
+  return rowData;
+}
+
+const emitRowModel = debounce(() => {
+  emits('update:modelValue', getRowData());
+}, 20);
+
+const updateModelIfUsed = (eventType: string) => {
+  if (gridReadyFired.value && ROW_DATA_EVENTS.has(eventType)) {
+      emitRowModel();
+  }
+}
+const globalEventListenerFactory = (restrictToSyncOnly?: boolean) => {
+  return (eventType: AgEventType) => {
+    if (isDestroyed.value) {
+      return;
+    }
+
+    if (eventType === 'gridReady') {
+      gridReadyFired.value = true;
+    }
+
+    const alwaysSync = ALWAYS_SYNC_GLOBAL_EVENTS.has(eventType);
+    if ((alwaysSync && !restrictToSyncOnly) || (!alwaysSync && restrictToSyncOnly)) {
+      return;
+    }
+
+    updateModelIfUsed(eventType);
+  };
+}
+
+const processChanges = (propertyName: string, currentValue: any, previousValue: any) => {
+  if (gridCreated.value) {
+    let value = currentValue.value || currentValue;
+    if (propertyName === 'rowData' && value != undefined) {
+      // Prevent the grids internal edits from being reactive
+      value = convertToRaw(value);
+    }
+
+    batchChanges.value[propertyName] = value;
+    if (batchTimeout.value == null) {
+      batchTimeout.value = window.setTimeout(() => {
+        // Clear the timeout before processing the changes in case processChanges triggers another change.
+        batchTimeout.value = null;
+        _processOnChange(batchChanges.value, api.value!);
+        batchChanges.value = {};
+      }, 0);
+    }
+  }
+}
+
+const propsAsRefs = toRefs<any>(props);
+_ALL_GRID_OPTIONS
+    .filter((propertyName: string) => propertyName != 'gridOptions') // dealt with in AgGridVue itself
+    .forEach((propertyName: string) => {
+      watch(() => propsAsRefs[propertyName],
+          (oldValue: any, newValue: any) => {
+            processChanges(propertyName, oldValue, newValue);
+          },
+          {deep: true})
+    })
+
+onMounted(() => {
+  const gridParams = {
+    globalEventListener: globalEventListenerFactory().bind(this),
+    globalSyncEventListener: globalEventListenerFactory(true).bind(this),
+    // frameworkOverrides: new VueFrameworkOverrides(this),
+    // providedBeanInstances: {
+    //   frameworkComponentWrapper,
+    // },
+    modules: props.modules
+  };
+
+  const gridOptions = markRaw(
+      _combineAttributesAndGridOptions(toRaw(props.gridOptions), props, [
+        ..._ALL_GRID_OPTIONS,
+        ..._ALL_EVENTS.map((event) => _getCallbackForEvent(event)),
+      ])
+  );
+
+  const rowData = getRowDataBasedOnBindings();
+  if (rowData !== undefined) {
+    gridOptions.rowData = convertToRaw(rowData);
+  }
+
+  api.value = createGrid(rootRef.value!, gridOptions, gridParams);
+  gridCreated.value = true;
+
+})
 </script>
 
 <template>

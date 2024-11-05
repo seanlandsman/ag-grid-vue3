@@ -1682,3 +1682,14 @@ export function getProps<TData, TColDef>() {
 // @END_DEFAULTS@
     };
 }
+
+export const debounce = (func: () => void, delay: number) => {
+    let timeout: number;
+    return () => {
+        const later = function () {
+            func();
+        };
+        window.clearTimeout(timeout);
+        timeout = window.setTimeout(later, delay);
+    };
+}
