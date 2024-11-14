@@ -1,6 +1,6 @@
 {
   "name": "ag-grid-vue3",
-  "version": "0.0.94",
+  "version": "0.0.107",
   "private": true,
   "files": [
     "dist"
@@ -18,8 +18,8 @@
     "bootstrap": "YARN_REGISTRY=\"http://52.50.158.57:4873\" yarn"
   },
   "dependencies": {
-    "vue": "^3.4.29",
-    "ag-grid-community": "32.2.0-beta.20241020"
+    "vue": "^3.5.0",
+    "ag-grid-community": "32.2.0-beta.20241114.933"
   },
   "devDependencies": {
     "replace-in-file": "4.1.0",
@@ -37,5 +37,8 @@
     "vite-plugin-vue-devtools": "^7.3.1",
     "vitest": "^1.6.0",
     "vue-tsc": "^2.0.21"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
   }
 }

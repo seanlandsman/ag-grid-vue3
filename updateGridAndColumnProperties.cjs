@@ -74,17 +74,18 @@ function generatePropsAndEmits({ typeLookup, eventTypeLookup, docLookup }) {
             inputTypeWithGenerics = inputType.replace('ColDef<TData>', 'TColDef');
         }
 
-        line += `  ${property}?: ${inputTypeWithGenerics},${EOL}`
+        line += `    ${property}?: ${inputTypeWithGenerics},${EOL}`
         const order = typeKeysOrder.findIndex((p) => p === property);
         propsToWrite.push({ order, line });
 
-        propDefaultsToWrite.push({ order, line: `  ${property}: undefined,${EOL}`});
+        propDefaultsToWrite.push({ order, line: `        ${property}: undefined,${EOL}`});
     });
 
     const props = writeSortedLines(propsToWrite, '');
     const defaults = writeSortedLines(propDefaultsToWrite, '');
 
     const eventsToWrite = [];
+    const eventsPropTypesWrite = [];
     const missingEventTypes = [];
     _PUBLIC_EVENTS.forEach((event) => {
         if (skippableEvents.includes(event)) return;
@@ -96,6 +97,7 @@ function generatePropsAndEmits({ typeLookup, eventTypeLookup, docLookup }) {
             line += `   '${event}': [event: ${eventType}],${EOL}`
             const order = typeKeysOrder.findIndex((p) => p === onEvent);
             eventsToWrite.push({ order, line });
+            eventsPropTypesWrite.push({ order, line: `   '${kebabNameToAttrEventName(kebabProperty(event))}': ${eventType},${EOL}` });
         } else {
             missingEventTypes.push(event);
         }
@@ -108,10 +110,11 @@ function generatePropsAndEmits({ typeLookup, eventTypeLookup, docLookup }) {
     }
 
     const events = writeSortedLines(eventsToWrite, '');
+    const eventPropTypes = writeSortedLines(eventsPropTypesWrite, '');
 
     const typesToImport = extractNonEventTypes({ eventTypeLookup, typeLookup }, skippableProperties, skippableEventTypes);
     const eventTypesToImport = extractEventTypes({ eventTypeLookup, typeLookup }, skippableProperties, skippableEventTypes);
-    return { code: props, types: typesToImport, eventTypes: eventTypesToImport, defaults, events };
+    return { code: props, types: typesToImport, eventTypes: eventTypesToImport, defaults, events, eventPropTypes };
 }
 
 function getSafeType(typeName) {
@@ -154,14 +157,7 @@ function parseFile(sourceFile) {
     return ts.createSourceFile('tempFile.ts', src, ts.ScriptTarget.Latest, true);
 }
 
-function extractNonEventTypes(context, propsToSkip = [], typesToSkip = []) {
-    let allTypes = [
-        ...Object.entries(context.typeLookup)
-            .filter(([k]) => !propsToSkip.includes(k))
-            .filter(([k]) => !context.eventTypeLookup[k])
-            .map(([_, v]) => v)
-    ];
-
+function extractType(allTypes, typesToSkip) {
     let propertyTypes = [];
     const regex = new RegExp(/(?<!\w)(?:[A-Z]\w+)/, 'g');
     allTypes.forEach((tt) => {
@@ -179,26 +175,32 @@ function extractNonEventTypes(context, propsToSkip = [], typesToSkip = []) {
     return expandedTypes.filter((t) => !typesToSkip.includes(t));
 }
 
+function extractNonEventTypes(context, propsToSkip = [], typesToSkip = []) {
+    let allTypes = [
+        ...Object.entries(context.typeLookup)
+            .filter(([k]) => !propsToSkip.includes(k))
+            .filter(([k]) => !context.eventTypeLookup[k])
+            .map(([_, v]) => v)
+    ];
+
+    return extractType(allTypes, typesToSkip);
+}
+
 function extractEventTypes(context, propsToSkip = [], typesToSkip = []) {
     let allTypes = [
         ...Object.values(context.eventTypeLookup),
     ];
 
-    let propertyTypes = [];
-    const regex = new RegExp(/(?<!\w)(?:[A-Z]\w+)/, 'g');
-    allTypes.forEach((tt) => {
-        const matches = tt.matchAll(regex);
-        for (const match of matches) {
-            propertyTypes.push(Array.from(match, (m) => m));
-        }
-    });
-    let expandedTypes = propertyTypes.flatMap((m) => m);
+    return extractType(allTypes, typesToSkip);
+}
 
-    const nonAgTypes = ['Partial', 'Document', 'HTMLElement', 'Function', 'TData'];
-    expandedTypes = [...new Set(expandedTypes)]
-        .filter((t) => !nonAgTypes.includes(t) && !AG_CHART_TYPES.includes(t))
-        .sort();
-    return expandedTypes.filter((t) => !typesToSkip.includes(t));
+function kebabNameToAttrEventName(kebabName) {
+    // grid-ready for example would become onGrid-ready in Vue
+    return `on${kebabName.charAt(0).toUpperCase()}${kebabName.substring(1, kebabName.length)}`;
+}
+
+function kebabProperty(property) {
+    return property.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
 function getGridPropertiesAndEventsJs() {
@@ -218,12 +220,17 @@ function getGridPropertiesAndEventsJs() {
     };
     extractTypesFromNode(srcFile, gridOptionsNode, context);
 
-    return generatePropsAndEmits(context);
+    const eventNameAsProps = _PUBLIC_EVENTS.map((eventName) => `        '${kebabNameToAttrEventName(kebabProperty(eventName))}': undefined`);
+
+    return {
+        ...generatePropsAndEmits(context),
+            eventNameAsProps
+    };
 }
 
 const updateGridProperties = (getGridPropertiesAndEvents) => {
     // extract the grid properties & events and add them to our angular grid component
-    const { code: gridPropertiesAndEvents, types, eventTypes, defaults, events } = getGridPropertiesAndEvents();
+    const { code: gridPropertiesAndEvents, types, eventTypes, defaults, events, eventNameAsProps, eventPropTypes } = getGridPropertiesAndEvents();
     const importsForProps = `import type {${EOL}    ${types.join(',' + EOL + '    ')}${EOL}} from "ag-grid-community";`;
     const importsForEvents = `import type {${EOL}    ${eventTypes.join(',' + EOL + '    ')}${EOL}} from "ag-grid-community";`;
 
@@ -231,12 +238,18 @@ const updateGridProperties = (getGridPropertiesAndEvents) => {
         files: './src/components/utils.ts',
         from: [/(\/\/ @START_PROPS@)[^]*(\/\/ @END_PROPS@)/,
             /(\/\/ @START_IMPORTS@)[^]*(\/\/ @END_IMPORTS@)/,
-            /(\/\/ @START_DEFAULTS@)[^]*(\/\/ @END_DEFAULTS@)/
+            /(\/\/ @START_EVENTS_IMPORTS@)[^]*(\/\/ @END_EVENTS_IMPORTS@)/,
+            /(\/\/ @START_DEFAULTS@)[^]*(\/\/ @END_DEFAULTS@)/,
+            /(\/\/ @START_EVENT_PROPS@)[^]*(\/\/ @END_EVENT_PROPS@)/,
+            /(\/\/ @START_EVENT_PROP_TYPES@)[^]*(\/\/ @END_EVENT_PROP_TYPES@)/
         ],
         to: [
             `// @START_PROPS@${EOL}${gridPropertiesAndEvents}    // @END_PROPS@`,
             `// @START_IMPORTS@${EOL}${importsForProps}${EOL}// @END_IMPORTS@`,
-            `// @START_DEFAULTS@${EOL}${defaults}${EOL}// @END_DEFAULTS@`
+            `// @START_EVENTS_IMPORTS@${EOL}${importsForEvents}// @END_EVENTS_IMPORTS@`,
+            `// @START_DEFAULTS@${EOL}${defaults}// @END_DEFAULTS@`,
+            `// @START_EVENT_PROPS@${EOL}${eventNameAsProps.join(`,${EOL}`)}${EOL}// @END_EVENT_PROPS@`,
+            `// @START_EVENT_PROP_TYPES@${EOL}${eventPropTypes}${EOL}// @END_EVENT_PROP_TYPES@`
         ],
     };
 
@@ -250,11 +263,11 @@ const updateGridProperties = (getGridPropertiesAndEvents) => {
     const optionsForVue = {
         files: './src/components/AgGridVue.vue',
         from: [/(\/\/ @START_IMPORTS@)[^]*(\/\/ @END_IMPORTS@)/,
-            /(\/\/ @START_EVENTS@)[^]*(\/\/ @END_EVENTS@)/,
+            // /(\/\/ @START_EVENTS@)[^]*(\/\/ @END_EVENTS@)/,
         ],
         to: [
             `// @START_IMPORTS@${EOL}${importsForEvents}${EOL}// @END_IMPORTS@`,
-            `// @START_EVENTS@${EOL}${events}${EOL}// @END_EVENTS@`
+            // `// @START_EVENTS@${EOL}${events}${EOL}// @END_EVENTS@`
         ],
     };
 

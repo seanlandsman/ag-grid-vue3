@@ -859,17 +859,17 @@ acorn@^8.11.0, acorn@^8.12.1:
   resolved "http://52.50.158.57:4873/acorn/-/acorn-8.14.0.tgz#063e2c70cac5fb4f6467f0b11152e04c682795b0"
   integrity sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==
 
-ag-charts-types@10.2.0-beta.20241020:
-  version "10.2.0-beta.20241020"
-  resolved "http://52.50.158.57:4873/ag-charts-types/-/ag-charts-types-10.2.0-beta.20241020.tgz#99c1bc1962e58d13d7a23c9dc5e1e9268e9dc764"
-  integrity sha512-aWYGmiT+z19FNnBXeSpXJcttCZVkTMbt2nOuJv2K4oINRborBNuYTF5dCa1uFstOFrLZnHNxF7B7+Vpi76HzDQ==
+ag-charts-types@10.3.1-beta.20241112:
+  version "10.3.1-beta.20241112"
+  resolved "http://52.50.158.57:4873/ag-charts-types/-/ag-charts-types-10.3.1-beta.20241112.tgz#7fe80c4d4635e689e30a0a260443468eee4084b2"
+  integrity sha512-QnQ5hySuOw55LGwE08g4zF47jOsInciLJ4iDcuxcm5ZSnSF04OieLBlQhjUkmUgJ40t527wfovNifXW1BVI1cg==
 
-ag-grid-community@32.2.0-beta.20241020:
-  version "32.2.0-beta.20241020"
-  resolved "http://52.50.158.57:4873/ag-grid-community/-/ag-grid-community-32.2.0-beta.20241020.tgz#e3278d5f1f5baebbb0f3baead7dfe26d0bfc662f"
-  integrity sha512-rothdFMPLm1lEnL0MOBVY3epBDlpPfzDUxPDXY6fK27a61Fr+8kigGCHw9kLqbI1O0GQB2vW9wt6fxRRiI5wNQ==
+ag-grid-community@32.2.0-beta.20241114.933:
+  version "32.2.0-beta.20241114.933"
+  resolved "http://52.50.158.57:4873/ag-grid-community/-/ag-grid-community-32.2.0-beta.20241114.933.tgz#b8904335003d4251eceb801843591a867c00d53d"
+  integrity sha512-f1fNmm46LaXJ0fHIh34T8aTldYg7m7SAYluWI/W0ynsLLpuj9cO6dg6FDha9C2kGcF18Qz9swa81XYlg9jRQKA==
   dependencies:
-    ag-charts-types "10.2.0-beta.20241020"
+    ag-charts-types "10.3.1-beta.20241112"
 
 agent-base@^7.0.2, agent-base@^7.1.0:
   version "7.1.1"
@@ -2117,6 +2117,7 @@ std-env@^3.5.0:
   integrity sha512-JPbdCEQLj1w5GilpiHAx3qJvFndqybBysA3qUOnznweH4QbNYUsW/ea8QzSrnh0vNsezMMw5bcVool8lM0gwzg==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
+  name string-width-cjs
   version "4.2.3"
   resolved "http://52.50.158.57:4873/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -2144,6 +2145,7 @@ string-width@^5.0.1, string-width@^5.1.2:
     strip-ansi "^7.0.1"
 
 "strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  name strip-ansi-cjs
   version "6.0.1"
   resolved "http://52.50.158.57:4873/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -2398,7 +2400,7 @@ vue-tsc@^2.0.21:
     "@vue/language-core" "2.1.10"
     semver "^7.5.4"
 
-vue@^3.4.29:
+vue@^3.5.0:
   version "3.5.12"
   resolved "http://52.50.158.57:4873/vue/-/vue-3.5.12.tgz#e08421c601b3617ea2c9ef0413afcc747130b36c"
   integrity sha512-CLVZtXtn2ItBIi/zHZ0Sg1Xkb7+PU32bJJ8Bmy7ts3jxXTcbfsEfBivFYYWz1Hur+lalqGAh65Coin0r+HRUfg==
