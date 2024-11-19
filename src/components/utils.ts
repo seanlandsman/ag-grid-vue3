@@ -11,6 +11,7 @@ import type {
     Column,
     CsvExportParams,
     DataTypeDefinition,
+    DefaultChartMenuItem,
     DomLayoutType,
     ExcelExportParams,
     ExcelStyle,
@@ -27,7 +28,6 @@ import type {
     GetServerSideGroupKey,
     GetServerSideGroupLevelParamsParams,
     GridState,
-    GridTheme,
     HeaderPosition,
     IAdvancedFilterBuilderParams,
     IAggFunc,
@@ -77,6 +77,7 @@ import type {
     StatusPanelDef,
     TabToNextCellParams,
     TabToNextHeaderParams,
+    Theme,
     TreeDataDisplayType,
     UseGroupTotalRow
 } from "ag-grid-community";
@@ -199,7 +200,6 @@ export interface Props<TData, TColDef> {
      */
     modules?: Module[] | undefined,
 // @START_PROPS@
-    alwaysPassFilter?: any,
     /** Specifies the status bar components to use in the status bar.
          */
     statusBar?: { statusPanels: StatusPanelDef[] } | undefined,
@@ -517,6 +517,11 @@ export interface Props<TData, TColDef> {
          * @default false
          */
     enableAdvancedFilter?: boolean | undefined,
+    /** Allows rows to always be displayed, even if they don't match the applied filtering.
+         * Return `true` for the provided row to always be displayed.
+         * Only works with the Client-Side Row Model.
+         */
+    alwaysPassFilter?: ((rowNode: IRowNode<TData>) => boolean) | undefined,
     /** Hidden columns are excluded from the Advanced Filter by default.
          * To include hidden columns, set to `true`.
          * @default false
@@ -565,7 +570,7 @@ export interface Props<TData, TColDef> {
     chartToolPanelsDef?: ChartToolPanelsDef | undefined,
     /** Get chart menu items. Only applies when using AG Charts Enterprise.
          */
-    chartMenuItems?: (string | MenuItemDef)[] | GetChartMenuItems<TData> | undefined,
+    chartMenuItems?: (DefaultChartMenuItem | MenuItemDef)[] | GetChartMenuItems<TData> | undefined,
     /** Provide your own loading cell renderer to use when data is loading via a DataSource.
          * See [Loading Cell Renderer](https://www.ag-grid.com/javascript-data-grid/component-loading-cell-renderer/) for framework specific implementation details.
          */
@@ -1303,7 +1308,7 @@ export interface Props<TData, TColDef> {
          * on the parent element of the grid. To opt back in to this behaviour, pass
          * the string "legacy"
          */
-    theme?: GridTheme | 'legacy' | undefined,
+    theme?: Theme | 'legacy' | undefined,
     /** Whether to load supported theme fonts from the Google Fonts server.
          *
          * - `true` -> load fonts automatically if your theme uses them
@@ -1405,6 +1410,7 @@ export interface Props<TData, TColDef> {
          */
     processPivotResultColGroupDef?: ((colGroupDef: ColGroupDef<TData>) => void) | undefined,
     /** Callback to be used when working with Tree Data when `treeData = true`.
+         * @initial
          */
     getDataPath?: GetDataPath<TData> | undefined,
     /** Allows setting the child count for a group row.
@@ -1577,7 +1583,6 @@ export function getProps<TData, TColDef>() {
         gridOptions: {} as any,
         modules: [] as any,
 // @START_DEFAULTS@
-        alwaysPassFilter: undefined,
         statusBar: undefined,
         sideBar: undefined,
         suppressContextMenu: undefined,
@@ -1652,6 +1657,7 @@ export function getProps<TData, TColDef>() {
         applyQuickFilterBeforePivotOrAgg: undefined,
         excludeChildrenWhenTreeDataFiltering: undefined,
         enableAdvancedFilter: undefined,
+        alwaysPassFilter: undefined,
         includeHiddenColumnsInAdvancedFilter: undefined,
         advancedFilterParent: undefined,
         advancedFilterBuilderParams: undefined,
@@ -1955,7 +1961,6 @@ export function getProps<TData, TColDef>() {
         'onRow-clicked': undefined,
         'onRow-double-clicked': undefined,
         'onGrid-ready': undefined,
-        'onGrid-pre-destroyed': undefined,
         'onGrid-size-changed': undefined,
         'onViewport-changed': undefined,
         'onFirst-data-rendered': undefined,
@@ -1980,6 +1985,8 @@ export function getProps<TData, TColDef>() {
         'onRow-drag-end': undefined,
         'onRow-drag-cancel': undefined
 // @END_EVENT_PROPS@
+
+        // _PUBLIC_EVENTS
     };
 }
 

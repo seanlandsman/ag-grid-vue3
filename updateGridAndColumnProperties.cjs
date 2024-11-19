@@ -10,6 +10,10 @@ const { formatNode, findNode, getFullJsDoc } = getFormatterForTS(ts);
 
 const AG_CHART_TYPES = ['AgChartTheme', 'AgChartThemeOverrides'];
 
+const skippableProperties = ['gridOptions', 'reactiveCustomComponents'];
+const skippableEvents = ['gridPreDestroyed'];
+const skippableEventTypes = ['GridPreDestroyedEvent'];
+
 function writeSortedLines(toWrite, result) {
     toWrite.sort((a, b) => {
         if (a.order < b.order) return -1;
@@ -55,9 +59,6 @@ function extractTypesFromNode(srcFile, node, { typeLookup, eventTypeLookup, publ
 }
 
 function generatePropsAndEmits({ typeLookup, eventTypeLookup, docLookup }) {
-    const skippableProperties = ['gridOptions', 'reactiveCustomComponents'];
-    const skippableEvents = ['gridPreDestroyed'];
-    const skippableEventTypes = ['GridPreDestroyedEvent'];
     let propsToWrite = [];
     let propDefaultsToWrite = [];
     const typeKeysOrder = Object.keys(typeLookup);
@@ -220,7 +221,8 @@ function getGridPropertiesAndEventsJs() {
     };
     extractTypesFromNode(srcFile, gridOptionsNode, context);
 
-    const eventNameAsProps = _PUBLIC_EVENTS.map((eventName) => `        '${kebabNameToAttrEventName(kebabProperty(eventName))}': undefined`);
+    const eventNameAsProps = _PUBLIC_EVENTS.filter(eventName => !skippableEvents.includes(eventName))
+        .map((eventName) => `        '${kebabNameToAttrEventName(kebabProperty(eventName))}': undefined`);
 
     return {
         ...generatePropsAndEmits(context),

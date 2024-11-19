@@ -100,7 +100,6 @@ import type {
 } from "ag-grid-community";
 // @END_IMPORTS@
 
-// noinspection ES6UnusedImports
 import type {
   AgEventType,
   ColDef,
@@ -127,13 +126,6 @@ import {debounce, deepToRaw, getProps} from "@/components/utils";
 import {VueFrameworkOverrides} from "@/components/VueFrameworkOverrides";
 import {VueFrameworkComponentWrapper} from "@/components/VueFrameworkComponentWrapper";
 
-const ROW_DATA_EVENTS: Set<string> = new Set(['rowDataUpdated', 'cellValueChanged', 'rowValueChanged']);
-const emits = defineEmits<{
-// @START_EVENTS@
-// @END_EVENTS@
-  'update:modelValue': [event: TData[]]
-}>();
-
 const props = withDefaults(defineProps<Props<TData, TColDef>>(), getProps<TData, TColDef>());
 
 const rootRef = useTemplateRef<HTMLDivElement>('root')
@@ -144,15 +136,45 @@ const isDestroyed: Ref<boolean> = ref(false);
 const gridReadyFired: Ref<boolean> = ref(false);
 const batchChanges: Ref<{ [key: string]: any }> = ref({});
 const batchTimeout: Ref<number | null> = ref(null);
+
+// setup up watches
+const propsAsRefs = toRefs<any>(props);
+_ALL_GRID_OPTIONS
+    .filter((propertyName: string) => propertyName != 'gridOptions') // dealt with in AgGridVue itself
+    .forEach((propertyName: string) => {
+      watch(() => propsAsRefs[propertyName],
+          (oldValue: any, newValue: any) => {
+            processChanges(propertyName, oldValue, newValue);
+          },
+          {deep: true})
+    })
+
+// v-model code start
+const ROW_DATA_EVENTS: Set<string> = new Set(['rowDataUpdated', 'cellValueChanged', 'rowValueChanged']);
 const rowDataModel = defineModel<TData[]>();
 const rowDataUpdating: Ref<boolean> = ref(false);
-
+const emits = defineEmits<{
+// @START_EVENTS@
+// @END_EVENTS@
+  'update:modelValue': [event: TData[]]
+}>();
 watch(rowDataModel, (newValue: any, oldValue: any) => {
   if (gridCreated.value) {
     rowDataUpdating.value = true;
     processChanges('rowData', deepToRaw(newValue), deepToRaw(oldValue));
   }
 }, {deep: true});
+
+const emitRowModel = debounce(() => {
+  emits('update:modelValue', deepToRaw<TData[]>(getRowData()));
+}, 20);
+
+const updateModelIfUsed = (eventType: string) => {
+  if (gridReadyFired.value && ROW_DATA_EVENTS.has(eventType)) {
+    emitRowModel();
+  }
+}
+// v-model code end
 
 const checkForBindingConflicts = () => {
   if ((props.rowData || props.gridOptions.rowData) && rowDataModel.value) {
@@ -170,16 +192,6 @@ const getRowData = (): TData[] => {
     rowData.push(rowNode.data);
   });
   return rowData;
-}
-
-const emitRowModel = debounce(() => {
-  // emits('update:modelValue', deepToRaw<TData[]>(getRowData()));
-}, 20);
-
-const updateModelIfUsed = (eventType: string) => {
-  if (gridReadyFired.value && ROW_DATA_EVENTS.has(eventType)) {
-    emitRowModel();
-  }
 }
 
 const globalEventListenerFactory = (restrictToSyncOnly?: boolean) => {
@@ -226,31 +238,16 @@ const processChanges = (propertyName: string, currentValue: any, previousValue: 
   }
 }
 
-const propsAsRefs = toRefs<any>(props);
-_ALL_GRID_OPTIONS
-    .filter((propertyName: string) => propertyName != 'gridOptions') // dealt with in AgGridVue itself
-    .forEach((propertyName: string) => {
-      watch(() => propsAsRefs[propertyName],
-          (oldValue: any, newValue: any) => {
-            processChanges(propertyName, oldValue, newValue);
-          },
-          {deep: true})
-    })
-
-
-/* components */
 const getProvides = () => {
   return Object.create((getCurrentInstance() as any).provides);
 }
-/* components */
-
 
 onMounted(() => {
   const frameworkComponentWrapper = new VueFrameworkComponentWrapper(getCurrentInstance(), getProvides());
 
   const gridParams = {
-    globalEventListener: globalEventListenerFactory().bind(this),
-    globalSyncEventListener: globalEventListenerFactory(true).bind(this),
+    globalListener: globalEventListenerFactory(),
+    globalSyncListener: globalEventListenerFactory(true),
     frameworkOverrides: new VueFrameworkOverrides(getCurrentInstance()),
     providedBeanInstances: {
       frameworkCompWrapper: frameworkComponentWrapper
